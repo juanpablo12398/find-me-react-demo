@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class DemoStore implements ModerationService.Store {
                     (sighting_id, reviewer_id, state_before, state_after, reason, created_at)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, event.sightingId(), event.reviewerId(), event.before().name(),
-                event.after().name(), event.reason(), event.at());
+                event.after().name(), event.reason(), Timestamp.from(event.at()));
     }
 
     public List<DemoReport> listReports() {
