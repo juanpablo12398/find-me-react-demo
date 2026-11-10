@@ -53,16 +53,41 @@ select {
   display: grid;
   gap: 8px;
 }
-.sidebar nav span {
+.sidebar nav button {
   padding: 12px;
   border-radius: 9px;
   font-size: 13px;
   color: #a9bdd2;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 .sidebar nav .nav-active {
   background: #25405e;
   color: #fff;
   font-weight: 700;
+}
+.sidebar nav button:focus-visible {
+  outline: 2px solid #ffbf62;
+}
+.map-panel {
+  background: #fff;
+  border: 1px solid #e1e7ef;
+  border-radius: 16px;
+  padding: 22px;
+}
+.leaflet-map {
+  height: 460px;
+  border-radius: 12px;
+  z-index: 0;
+}
+.api-error {
+  color: #9a2e2e;
+  background: #fff1f1;
+  border: 1px solid #f2bcbc;
+  border-radius: 10px;
+  padding: 12px;
 }
 .sidebar-note {
   margin-top: auto;
@@ -335,9 +360,15 @@ footer {
     gap: 15px;
     padding: 15px;
   }
-  .sidebar nav,
   .sidebar-note {
     display: none;
+  }
+  .sidebar nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .sidebar nav button {
+    padding: 9px 10px;
   }
   main {
     padding: 25px;

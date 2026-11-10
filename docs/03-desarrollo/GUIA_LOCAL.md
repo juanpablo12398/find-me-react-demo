@@ -1,15 +1,25 @@
 # Guía de desarrollo local
 
-**Requisito:** Node.js 24 y npm. No hace falta Java, PostGIS, cuenta externa ni archivo `.env` para esta muestra.
+Requisitos: Java 17+, Maven, Node.js, npm y Docker con Compose. El servidor y la base se enlazan a loopback; los datos son ficticios.
+
+```bash
+docker compose up -d
+mvn -f backend/pom.xml spring-boot:run
+```
+
+En otra terminal:
 
 ```bash
 npm ci
 npm run dev
-npm test
-npm run build
-npm run preview
 ```
 
-`src/App.jsx` contiene las cuatro entradas inventadas, filtros, selección y transiciones en memoria. `src/styles.css` da el diseño adaptable. `src/App.test.jsx` prueba el comportamiento visible. `vitest.config.js` configura jsdom. `index.html` monta la aplicación mediante `src/main.jsx`.
+Abrir `http://localhost:5173`. Vite reenvía `/api` al servidor Java en `127.0.0.1:8081`. `schema.sql` y `data.sql` preparan cuatro registros sintéticos. La UI consulta la API, persiste una revisión y vuelve a leer auditoría y mapa. Las modificaciones persisten en el volumen de la base local.
 
-No añadir casos, fotos, ubicaciones precisas ni claves al conjunto ficticio. Si se amplía la UI, actualizar primero el SDD y los criterios de aceptación, y añadir una prueba de la interacción nueva. La recarga restablece siempre el escenario.
+```bash
+npm run test:coverage
+npm run build
+mvn -f backend/pom.xml test
+```
+
+Para ejecutar también las pruebas Java de integración en local, definir `POSTGIS_JDBC_URL=jdbc:postgresql://127.0.0.1:5432/findme_public_demo`. GitHub Actions configura su propia base PostGIS de prueba. El encabezado `X-Demo-Reviewer` sirve solo al escenario ficticio, no a una instalación de producción. No introducir casos, fotos, coordenadas, identidades ni claves reales.

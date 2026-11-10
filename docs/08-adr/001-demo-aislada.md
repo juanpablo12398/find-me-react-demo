@@ -1,15 +1,15 @@
-# ADR 001 · Demo de revisión aislada
+# ADR 001 · Interfaz pública aislada (etapa inicial)
 
-**Estado:** aceptada para el repositorio público.
+**Estado:** reemplazada para el recorrido actual por el [SDD 003](../../specs/003-connected-public-sample/sdd.md).
 
 ## Contexto
 
-Find Me maneja un tema sensible. Un portfolio debe permitir inspeccionar la capacidad de diseñar una interfaz de moderación sin exponer información de personas ni abrir un canal informal de reportes.
+El primer recorte del portfolio necesitaba mostrar revisión sin copiar identidades o datos de personas.
 
-## Decisión
+## Decisión inicial
 
-Publicar una SPA React/Vite nueva con registros ficticios y transiciones en memoria. La UI advierte que no verifica identidades ni recibe denuncias. No se copia el backend ni se añade configuración para conectarlo.
+Se publicó una SPA React con registros inventados y transiciones en memoria. Esa etapa permitió validar el diseño de interacción.
 
-## Consecuencias
+## Evolución
 
-El evaluador puede reproducir filtros y estados con `npm run dev`, y verificar el comportamiento con `npm test`. Esta muestra no sirve para medir seguridad, persistencia, moderación institucional o desempeño del producto privado. Cualquier extensión futura que implique datos reales requeriría un diseño y una revisión separados.
+La muestra actual conecta React con una API Spring Boot y PostgreSQL/PostGIS de datos ficticios. La política, las transiciones, la auditoría y el filtrado geográfico se pueden revisar y probar. La identidad y los flujos reales permanecen fuera de este repositorio. El encabezado de muestra no es autenticación de producción.

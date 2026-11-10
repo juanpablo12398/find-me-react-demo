@@ -21,10 +21,14 @@ class GeoSearchRepositoryTest {
     @Test void actualRepositoryQueryRunsAgainstPostgisWhenConfigured() {
         String url = System.getenv("POSTGIS_JDBC_URL");
         assumeTrue(url != null && !url.isBlank(), "requires POSTGIS_JDBC_URL; CI supplies PostGIS");
-        var dataSource = new DriverManagerDataSource(url, "postgres", "postgres");
+        String schema = "geo_test_" + UUID.randomUUID().toString().replace("-", "");
+        var adminJdbc = new JdbcTemplate(new DriverManagerDataSource(url, "postgres", "postgres"));
+        adminJdbc.execute("CREATE SCHEMA " + schema);
+        var dataSource = new DriverManagerDataSource(
+                url + (url.contains("?") ? "&" : "?") + "currentSchema=" + schema + ",public",
+                "postgres", "postgres");
         var jdbc = new JdbcTemplate(dataSource);
         jdbc.execute("CREATE EXTENSION IF NOT EXISTS postgis");
-        jdbc.execute("DROP TABLE IF EXISTS public_sightings");
         jdbc.execute("""
                 CREATE TABLE public_sightings (
                     id UUID PRIMARY KEY,

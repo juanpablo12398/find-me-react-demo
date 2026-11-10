@@ -1,5 +1,7 @@
 # SDD 002 · Moderación, privacidad y búsqueda espacial
 
+**Etapa histórica:** este recorte Java ya está conectado a la interfaz en el [SDD 003](../003-connected-public-sample/sdd.md).
+
 ## Problema y alcance
 
 La demo React 001 prueba únicamente una interfaz. Este recorte publica una parte del diseño Java/Spring de Find Me sin datos de personas ni la aplicación completa. Requisitos: una transición de estado requiere administrador y motivo; deja auditoría; el público ve solo `PUBLICADO_NO_VERIFICADO`; la búsqueda por mapa aplica el mismo filtro.

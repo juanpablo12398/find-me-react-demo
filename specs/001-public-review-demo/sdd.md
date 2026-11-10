@@ -1,6 +1,6 @@
 # SDD · Demo React de revisión
 
-**Estado:** implementado. Este SDD documenta el **código público actual**, no una propuesta de arquitectura para el producto privado. Referencia de implementación: `src/App.jsx`.
+**Estado:** etapa inicial implementada. El recorrido público conectado actual está descrito en el [SDD 003](../003-connected-public-sample/sdd.md). Este texto conserva las decisiones de aquella etapa React aislada.
 
 ## 1. Contexto y límites
 

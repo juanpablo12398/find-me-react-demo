@@ -1,78 +1,123 @@
 import React from "react";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
+import { demoApi } from "./api";
 
-describe("Find Me public review demo", () => {
-  test("starts with fictional, unpublished records and an unverified warning", () => {
+vi.mock("./api", () => ({
+  demoApi: {
+    reports: vi.fn(),
+    audit: vi.fn(),
+    review: vi.fn(),
+    map: vi.fn(),
+  },
+}));
+vi.mock("./MapPanel", () => ({
+  default: ({ revision }) => <div>Connected map revision {revision}</div>,
+}));
+
+const id = (n) => `00000000-0000-4000-8000-000000000${n}`;
+const reports = [
+  { id: id(101), area: "North district", category: "Community report", state: "RECIBIDO", receivedAt: "09:20", description: "Fictional report one" },
+  { id: id(102), area: "River district", category: "Case update", state: "REQUIERE_MAS_INFORMACION", receivedAt: "10:45", description: "Fictional report two" },
+  { id: id(103), area: "Central district", category: "Community report", state: "PUBLICADO_NO_VERIFICADO", receivedAt: "11:15", description: "Fictional report three" },
+  { id: id(104), area: "South district", category: "Case update", state: "EN_REVISION", receivedAt: "12:30", description: "Fictional report four" },
+];
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  demoApi.reports.mockResolvedValue(reports.map((item) => ({ ...item })));
+  demoApi.audit.mockResolvedValue([]);
+  demoApi.review.mockImplementation(async (reportId, state) => ({
+    ...reports.find((item) => item.id === reportId),
+    state,
+  }));
+});
+
+describe("Find Me connected public sample", () => {
+  test("loads fictional queue from API and identifies unverified information", async () => {
     render(<App />);
+    expect(await screen.findByRole("button", { name: /DEMO-101/ })).toBeInTheDocument();
+    expect(demoApi.reports).toHaveBeenCalledOnce();
     expect(screen.getByText("4", { selector: ".stats strong" })).toBeInTheDocument();
-    expect(screen.getByText("0", { selector: ".stats strong" })).toBeInTheDocument();
     expect(screen.getByText("Unverified community information")).toBeInTheDocument();
     expect(screen.getByText(/cannot accept real reports/)).toBeInTheDocument();
   });
 
-  test("search and status filter narrow the visible queue", async () => {
+  test("search and status filter operate on server loaded records", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await screen.findByRole("button", { name: /DEMO-101/ });
     await user.type(screen.getByRole("textbox", { name: "Search records" }), "river");
     expect(screen.getByRole("button", { name: /DEMO-102/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /DEMO-101/ })).not.toBeInTheDocument();
-    await user.selectOptions(screen.getByRole("combobox", { name: "Filter status" }), "Reviewed");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Filter status" }), "PUBLICADO_NO_VERIFICADO");
     expect(screen.getByText("No fictional records match this filter.")).toBeInTheDocument();
   });
 
-  test("review changes only the selected record and updates the pending count", async () => {
+  test("publishing calls Spring API and updates the selected record", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await user.click(screen.getByRole("button", { name: /DEMO-103/ }));
-    await user.click(screen.getByRole("button", { name: "Mark reviewed" }));
-    const detail = document.querySelector(".detail-panel");
-    expect(within(detail).getByText("Reviewed")).toBeInTheDocument();
-    expect(screen.getByText("1", { selector: ".stats strong" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /DEMO-101/ })).toHaveTextContent("Pending review");
+    await screen.findByRole("button", { name: /DEMO-101/ });
+    await user.click(screen.getByRole("button", { name: "Publish unverified" }));
+    expect(demoApi.review).toHaveBeenCalledWith(id(101), "PUBLICADO_NO_VERIFICADO", "Fictional review action");
+    expect(await screen.findByText("0", { selector: ".stats strong" })).toBeInTheDocument();
+    expect(within(document.querySelector(".detail-panel")).getByText("Public · unverified")).toBeInTheDocument();
   });
 
-  test("requesting context keeps the record out of the reviewed state", async () => {
+  test("request context then resume follows backend transition names", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await screen.findByRole("button", { name: /DEMO-101/ });
     await user.click(screen.getByRole("button", { name: "Request context" }));
-    expect(document.querySelector(".detail-panel")).toHaveTextContent("Needs context");
-    await user.selectOptions(screen.getByRole("combobox", { name: "Filter status" }), "Needs context");
-    expect(screen.getByRole("button", { name: /DEMO-101/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /DEMO-102/ })).toBeInTheDocument();
+    expect(demoApi.review).toHaveBeenCalledWith(id(101), "REQUIERE_MAS_INFORMACION", expect.any(String));
+    await user.click(await screen.findByRole("button", { name: "Resume review" }));
+    expect(demoApi.review).toHaveBeenLastCalledWith(id(101), "EN_REVISION", expect.any(String));
   });
 
-  test("search ignores case and includes category as well as area", async () => {
+  test("published record can be restricted", async () => {
     const user = userEvent.setup();
     render(<App />);
-    const search = screen.getByRole("textbox", { name: "Search records" });
-    await user.type(search, "RIVER");
-    expect(screen.getAllByRole("button", { name: /DEMO-/ })).toHaveLength(1);
-    await user.clear(search);
-    await user.type(search, "case update");
-    expect(screen.getAllByRole("button", { name: /DEMO-/ })).toHaveLength(2);
+    await user.click(await screen.findByRole("button", { name: /DEMO-103/ }));
+    await user.click(screen.getByRole("button", { name: "Restrict" }));
+    expect(demoApi.review).toHaveBeenCalledWith(id(103), "RESTRINGIDO", expect.any(String));
   });
 
-  test("a reviewed record appears under the Reviewed filter", async () => {
+  test("map section is reachable and receives revision after review", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await user.click(screen.getByRole("button", { name: /DEMO-101/ }));
-    await user.click(screen.getByRole("button", { name: "Mark reviewed" }));
-    await user.selectOptions(screen.getByRole("combobox", { name: "Filter status" }), "Reviewed");
-    expect(screen.getByRole("button", { name: /DEMO-101/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /DEMO-104/ })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /DEMO-103/ })).not.toBeInTheDocument();
+    await screen.findByRole("button", { name: /DEMO-101/ });
+    await user.click(screen.getByRole("button", { name: "Publish unverified" }));
+    await user.click(screen.getByRole("button", { name: /Public map/ }));
+    expect(screen.getByText("Connected map revision 1")).toBeInTheDocument();
   });
 
-  test("a fresh mount restores the fictional scenario", async () => {
+  test("audit section displays refreshed server event", async () => {
     const user = userEvent.setup();
-    const view = render(<App />);
-    await user.click(screen.getByRole("button", { name: "Mark reviewed" }));
-    expect(screen.getByText("1", { selector: ".stats strong" })).toBeInTheDocument();
-    view.unmount();
+    demoApi.audit.mockResolvedValueOnce([]).mockResolvedValueOnce([
+      { sightingId: id(101), before: "RECIBIDO", after: "PUBLICADO_NO_VERIFICADO", reason: "Fictional review action", at: "2024-01-01" },
+    ]);
     render(<App />);
-    expect(screen.getByText("2", { selector: ".stats strong" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /DEMO-101/ })).toHaveTextContent("Pending review");
+    await screen.findByRole("button", { name: /DEMO-101/ });
+    await user.click(screen.getByRole("button", { name: "Publish unverified" }));
+    await user.click(screen.getByRole("button", { name: /Audit trail/ }));
+    expect(await screen.findByText(/Pending review → Public · unverified/)).toBeInTheDocument();
+  });
+
+  test("API errors are shown instead of pretending local state changed", async () => {
+    const user = userEvent.setup();
+    demoApi.review.mockRejectedValue(new Error("Review failed"));
+    render(<App />);
+    await screen.findByRole("button", { name: /DEMO-101/ });
+    await user.click(screen.getByRole("button", { name: "Publish unverified" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Review failed");
+    expect(within(document.querySelector(".detail-panel")).getByText("Pending review")).toBeInTheDocument();
+  });
+
+  test("unavailable backend is reported", async () => {
+    demoApi.reports.mockRejectedValue(new Error("Demo API offline"));
+    render(<App />);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Demo API offline");
   });
 });

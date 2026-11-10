@@ -1,6 +1,7 @@
 package dev.verdondoni.findme;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -29,6 +30,7 @@ public class ModerationService {
         this.clock = clock;
     }
 
+    @Transactional
     public Sighting changeState(UUID id, ReviewState next, String reason,
                                 UUID reviewerId, boolean isAdmin) {
         if (!isAdmin || reviewerId == null) {

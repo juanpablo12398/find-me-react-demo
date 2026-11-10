@@ -1,9 +1,10 @@
-# Recorrido de la demo
+# Recorrido de la muestra conectada
 
-1. Ejecutar `npm ci` y `npm run dev`; abrir la dirección local que informa Vite.
-2. Comprobar que hay cuatro entradas ficticias, dos pendientes y ninguna publicación automática.
-3. Buscar `river` para ver sólo `DEMO-102`; combinarlo con `Reviewed` para ver el estado vacío.
-4. Limpiar la búsqueda, seleccionar `DEMO-103` y usar `Mark reviewed`. El contador pendiente baja de dos a uno.
-5. Seleccionar otra entrada y usar `Request context` para comprobar un segundo tipo de transición.
+1. Iniciar PostGIS, Spring Boot y Vite según la [guía local](../03-desarrollo/GUIA_LOCAL.md).
+2. Abrir la cola. Los cuatro registros ficticios llegan desde la API; buscar por ID o zona y filtrar por estado.
+3. Abrir **Public map**. Al inicio aparece solo el punto marcado como publicado y no verificado. El mapa consulta por los límites visibles.
+4. Volver a la cola, elegir un registro pendiente y pulsar **Publish unverified**. La API valida y guarda el nuevo estado.
+5. Abrir **Audit trail** para comprobar el evento de transición. Volver al mapa y comprobar el punto adicional.
+6. Probar **Request context** y **Resume review** con otro registro; las transiciones se guardan en PostgreSQL.
 
-Las acciones se pierden al recargar. La pantalla no permite enviar un reporte real ni reemplaza los canales oficiales de búsqueda de personas.
+Todo el contenido es inventado. La muestra no recibe reportes reales ni confirma avistamientos. El mapa excluye los registros pendientes y restringidos.
