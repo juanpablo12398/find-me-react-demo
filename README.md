@@ -15,6 +15,12 @@ npm install
 npm run dev
 ```
 
+Run the public demo tests with `npm test` and verify the production bundle with `npm run build`. These checks cover this repository's visible React workflow only; they do not claim coverage of the private Java backend or the full Find Me application.
+
+## Documentation
+
+The [documentation index](docs/00-indice/INDICE.md) links the public specification, design (SDD), implementation plan, decisions, user walkthrough and test strategy. Its scope is deliberately limited to this standalone demo; it follows the organization of the full project's documentation without copying private specifications.
+
 ## What to inspect
 
 - `src/App.jsx`: filtering and review state in React.
