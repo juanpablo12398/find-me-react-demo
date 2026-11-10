@@ -1,6 +1,6 @@
 # Find Me · muestra pública conectada
 
-Muestra **ejecutable de extremo a extremo** de Find Me: React/Vite consulta un servidor Java/Spring Boot; PostgreSQL/PostGIS conserva registros ficticios y filtra los puntos que Leaflet dibuja en el mapa. Una revisión cambia el estado en la base y deja un evento de auditoría. El producto académico completo es privado.
+Muestra **ejecutable de extremo a extremo** de Find Me: React/Vite consulta un servidor Java/Spring Boot; PostgreSQL/PostGIS conserva registros ficticios y filtra los puntos que Leaflet dibuja en el mapa. Una revisión cambia el estado en la base y deja un evento de auditoría. El [código del corte académico demo-estable](https://github.com/juanpablo12398/find-me-stable) también está publicado; las versiones posteriores permanecen privadas.
 
 **Todos los registros, coordenadas e identificadores aquí son ficticios.** Find Me no es un canal oficial de denuncias ni confirma avistamientos. Esta muestra no recibe reportes reales ni verifica identidades.
 
@@ -43,4 +43,4 @@ mvn -f backend/pom.xml test
 
 La suite de PostGIS se ejecuta completa en [GitHub Actions](.github/workflows/verify.yml). Localmente, las pruebas que necesitan PostgreSQL/PostGIS se omiten si no se define `POSTGIS_JDBC_URL`. La [documentación](docs/00-indice/INDICE.md) incluye los SDD por etapa, contratos, decisiones, matriz de pruebas y límites de la extracción.
 
-**Alcance de publicación:** código adaptado para esta muestra; el sistema, las personas y la seguridad real permanecen privados. Copyright © Juan Pablo Verdondoni. No se concede licencia de reutilización.
+**Alcance de publicación:** código adaptado para esta muestra, separado del [snapshot estable](https://github.com/juanpablo12398/find-me-stable); las personas, datos reales y versiones posteriores permanecen privados. Copyright © Juan Pablo Verdondoni. No se concede licencia de reutilización.
